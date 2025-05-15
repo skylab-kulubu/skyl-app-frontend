@@ -73,11 +73,10 @@ export default function LoginPage() {
     }
   };
 
-  // ... JSX remains the same ...
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-        <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+    <main className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
+      <div className="w-full max-w-md p-4 sm:p-8 space-y-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+        <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-900 dark:text-white">
           Skylapp Login
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">

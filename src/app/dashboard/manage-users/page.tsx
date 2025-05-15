@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, FormEvent } from 'react';
 import Cookies from 'js-cookie';
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from 'next/navigation';
 
 interface User {
   id: number;
@@ -23,6 +25,13 @@ interface NewUserFormData {
   password: string;
 }
 
+interface JWTPayload {
+  role: string[];
+  sub: string;
+  iat: number;
+  exp: number;
+}
+
 const getAuthToken = () => {
   const token = Cookies.get('authToken');
   if (!token) {
@@ -33,6 +42,27 @@ const getAuthToken = () => {
 };
 
 const ManageUsersPage = () => {
+  const router = useRouter();
+  
+  // Check authorization on component mount
+  useEffect(() => {
+    const token = Cookies.get('authToken');
+    if (!token) {
+      router.push('/dashboard');
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode<JWTPayload>(token);
+      if (!decoded.role.includes('ROLE_ADMIN')) {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      router.push('/dashboard');
+    }
+  }, [router]);
+
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -132,10 +162,10 @@ const ManageUsersPage = () => {
   if (error) return <p className="text-red-400">Error fetching users: {error}</p>;
 
   return (
-    <div className="container mx-auto p-4 bg-gray-900 text-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-center text-white">Manage Users</h1>
+    <div className="container mx-auto p-2 sm:p-4 bg-gray-900 text-gray-100 min-h-screen">
+      <h1 className="text-xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-white">Manage Users</h1>
 
-      <div className="max-w-lg mx-auto mb-12 p-6 bg-gray-800 border border-gray-700 rounded-lg shadow-xl">
+      <div className="max-w-lg mx-auto mb-8 p-4 sm:p-6 bg-gray-800 border border-gray-700 rounded-lg shadow-xl">
         <h2 className="text-2xl font-semibold mb-4 text-white text-center">Create New User</h2>
         <form onSubmit={handleCreateUser} className="space-y-4">
           <div>
@@ -196,41 +226,45 @@ const ManageUsersPage = () => {
         </form>
       </div>
 
-      <h2 className="text-2xl font-semibold mb-4 text-white">Current Users</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-white">Current Users</h2>
+      
       <div className="overflow-x-auto shadow-xl rounded-lg">
-        <table className="min-w-full divide-y divide-gray-700 bg-gray-800">
-          <thead className="bg-gray-700">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Name</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Username</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Enabled</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Roles</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-700">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-700 transition-colors duration-150">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{user.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">{user.firstName || ''} {user.lastName || ''}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{user.username}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{user.enabled ? 
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-700 text-green-100">Yes</span> : 
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-700 text-red-100">No</span>}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{user.authorities.join(', ')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                  Acc Non-Expired: {user.accountNonExpired ? 'Yes' : 'No'}<br />
-                  Acc Non-Locked: {user.accountNonLocked ? 'Yes' : 'No'}<br />
-                  Cred Non-Expired: {user.credentialsNonExpired ? 'Yes' : 'No'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-700 bg-gray-800">
+              <thead className="bg-gray-700">
+                <tr>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Name</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden sm:table-cell">Email</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden md:table-cell">Username</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden lg:table-cell">Roles</th>
+                </tr>
+              </thead>
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
+                {users.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-700 transition-colors duration-150">
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-400">{user.id}</td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-200">
+                      {user.firstName || ''} {user.lastName || ''}
+                      <div className="sm:hidden text-xs text-gray-400">{user.email}</div>
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-400 hidden sm:table-cell">{user.email}</td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-400 hidden md:table-cell">{user.username}</td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-400">
+                      {user.enabled ? 
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-700 text-green-100">Active</span> : 
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-700 text-red-100">Inactive</span>
+                      }
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-400 hidden lg:table-cell">{user.authorities.join(', ')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

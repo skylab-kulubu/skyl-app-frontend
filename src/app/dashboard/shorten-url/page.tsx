@@ -1,9 +1,13 @@
-// src/app/dashboard/shorten-url/page.tsx
 'use client';
 
 import { useState, FormEvent } from 'react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
+
+interface ShortenPayload {
+  url: string;
+  alias?: string;
+}
 
 interface ShortenResponse {
   id: number;
@@ -36,9 +40,14 @@ export default function ShortenUrlPage() {
       return;
     }
 
-    const aliasToSend = customAlias.trim() === '' ? null : customAlias.trim();
-
     try {
+      // Only create alias property if there's actually a value
+      let payload: ShortenPayload = { url: originalUrl };
+      
+      if (customAlias.trim().length > 0) {
+        payload = { url: originalUrl, alias: customAlias.trim() };
+      }
+
       const response = await fetch('https://api.skyl.app/shorten', {
         method: 'POST',
         headers: {
@@ -46,10 +55,7 @@ export default function ShortenUrlPage() {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({
-          url: originalUrl,
-          alias: aliasToSend,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -57,7 +63,7 @@ export default function ShortenUrlPage() {
         try {
           const errorData = await response.json();
           if (errorData.message && typeof errorData.message === 'string' && errorData.message.includes('Alias already exists')) {
-            errorMessage = `Error: The alias "${aliasToSend}" is already taken. Please choose another one or leave it blank for a random alias.`;
+            errorMessage = `Error: The alias "${payload.alias}" is already taken. Please choose another one or leave it blank for a random alias.`;
           } else {
             errorMessage = errorData?.message || errorData?.error || errorMessage;
           }
@@ -81,11 +87,10 @@ export default function ShortenUrlPage() {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Shorten a New URL</h1>
+    <div className="p-2 sm:p-4">
+      <h1 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-gray-900 dark:text-white">Shorten a New URL</h1>
 
-      {/* ADDED mx-auto HERE */}
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md max-w-lg mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-lg shadow-md max-w-lg mx-auto">
         <div>
           <label htmlFor="originalUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Original URL <span className="text-red-500">*</span>

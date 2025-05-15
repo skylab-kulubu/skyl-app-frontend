@@ -1,4 +1,7 @@
-// src/app/dashboard/layout.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/Sidebar'; // Adjust path if needed
 
 export default function DashboardLayout({
@@ -6,15 +9,35 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <section className="flex h-screen overflow-hidden">
-      {/* Include shared UI here e.g. a sidebar */}
-      <Sidebar />
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
-      {/* Main content area that scrolls */}
-      <main className="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
-        {children}
-      </main>
-    </section>
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Close sidebar when pathname changes (i.e., when navigation occurs)
+  useEffect(() => {
+    if (isSidebarOpen) {
+      setIsSidebarOpen(false);
+    }
+  }, [pathname]);
+
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="flex">
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        
+        {/* Main Content */}
+        <main className={`
+          flex-1 transition-all duration-300 ease-in-out
+          ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}
+        `}>
+          <div className="container mx-auto px-4 py-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
   );
 }
