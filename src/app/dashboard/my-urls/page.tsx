@@ -22,7 +22,7 @@ interface UrlData {
   createdBy: User;
   expirationDate: string | null;
 }
-// --- ---
+// ---
 
 export default function MyUrlsPage() {
   const [myUrls, setMyUrls] = useState<UrlData[]>([]);
@@ -78,7 +78,7 @@ export default function MyUrlsPage() {
     };
 
     fetchMyUrls();
-  }, [error]); // Run once on mount
+  }, []); // Remove error from dependency array
 
   const someFunction = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -87,59 +87,65 @@ export default function MyUrlsPage() {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">My URLs</h1>
+    <div className="p-2 sm:p-4">
+      <h1 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-900 dark:text-white">My URLs</h1>
 
       {isLoading && <p className="text-gray-600 dark:text-gray-400">Loading your URLs...</p>}
-
       {error && <p className="text-red-600 dark:text-red-400">Error: {error}</p>}
 
       {!isLoading && !error && (
         <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
-          <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-               <tr>
-                 <th scope="col" className="py-3 px-6">Alias</th>
-                 <th scope="col" className="py-3 px-6">Original URL</th>
-                 <th scope="col" className="py-3 px-6">Clicks</th>
-                 <th scope="col" className="py-3 px-6">Expires</th>
-                  {/* Removed 'Created By' as it's always the current user */}
-                  {/* Add actions like Delete/Edit if needed */}
-               </tr>
-             </thead>
-             <tbody>
-              {myUrls.length === 0 ? (
-                 <tr>
-                    <td colSpan={4} className="py-4 px-6 text-center text-gray-500 dark:text-gray-400">
-                       You haven't created any URLs yet.
-                    </td>
-                 </tr>
-               ) : (
-                  myUrls.map((url) => (
-                    <tr key={url.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                       <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                         <Link href={`https://skyl.app/${url.alias}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                           skyl.app/{url.alias}
-                         </Link>
-                       </td>
-                       <td className="py-4 px-6 max-w-xs truncate" title={url.url}>
-                         <a href={url.url} target="_blank" rel="noopener noreferrer" className="hover:underline">{url.url}</a>
-                       </td>
-                       <td className="py-4 px-6">
-                         {url.clickCount}
-                       </td>
-                       <td className="py-4 px-6">
-                         {url.expirationDate ? new Date(url.expirationDate).toLocaleDateString() : 'Never'}
-                       </td>
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Alias</th>
+                    <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">URL</th>
+                    <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Clicks</th>
+                    <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Expires</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {myUrls.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="py-4 px-4 text-center text-gray-500 dark:text-gray-400">
+                        You haven't created any URLs yet.
+                      </td>
                     </tr>
-                  ))
-               )}
-             </tbody>
-          </table>
+                  ) : (
+                    myUrls.map((url) => (
+                      <tr key={url.id} className="hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <td className="py-4 px-4 text-sm">
+                          <Link href={`https://skyl.app/${url.alias}`} 
+                                target="_blank" 
+                                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
+                            {url.alias}
+                          </Link>
+                          <div className="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                            {url.url}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                          <div className="max-w-xs truncate" title={url.url}>
+                            {url.url}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-500 dark:text-gray-400">
+                          {url.clickCount}
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                          {url.expirationDate ? new Date(url.expirationDate).toLocaleDateString() : 'Never'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
-      {/* Escaped single quote */}
-      <p>It&apos;s an example.</p>
     </div>
   );
 }
