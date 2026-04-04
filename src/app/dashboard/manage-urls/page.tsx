@@ -19,7 +19,7 @@ interface UserProfile {
   email?: string;
   university?: string;
   department?: string;
-  sky_number?: string;
+  skyNumber?: string; 
   [key: string]: any;
 }
 
@@ -82,6 +82,7 @@ export default function ManageUrlsPage() {
   }, [token]);
 
   // --- KULLANICI İŞLEMLERİ ---
+  // --- KULLANICI İŞLEMLERİ ---
   const handleUserClick = async (userId: string) => {
     setIsUserModalOpen(true);
     setIsUserLoading(true);
@@ -97,8 +98,15 @@ export default function ManageUrlsPage() {
       });
 
       if (!res.ok) throw new Error(`Kullanıcı bilgileri alınamadı (Hata: ${res.status})`);
-      const userData = await res.json();
-      setSelectedUser(userData);
+      
+      const responseData = await res.json();
+      
+      if (responseData.success && responseData.data) {
+        setSelectedUser(responseData.data);
+      } else {
+        throw new Error("Kullanıcı verisi formatı geçersiz.");
+      }
+      
     } catch (err: any) {
       setUserError(err.message);
     } finally {
@@ -233,7 +241,7 @@ export default function ManageUrlsPage() {
                   <p className="font-semibold text-base">{selectedUser.firstName} {selectedUser.lastName}</p>
                 </div>
                 {selectedUser.email && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">E-posta</p><p className="font-medium">{selectedUser.email}</p></div>)}
-                {selectedUser.sky_number && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sky Numarası</p><p className="font-mono text-indigo-500 font-bold">{selectedUser.sky_number}</p></div>)}
+                {selectedUser.skyNumber && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sky Numarası</p><p className="font-mono text-indigo-500 font-bold">{selectedUser.sky_number}</p></div>)}
                 {selectedUser.university && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Üniversite</p><p>{selectedUser.university}</p></div>)}
                 {selectedUser.department && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bölüm</p><p>{selectedUser.department}</p></div>)}
               </div>
