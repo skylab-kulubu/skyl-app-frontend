@@ -8,7 +8,7 @@ interface UrlData {
   url: string;
   alias: string;
   clickCount: number;
-  createdByUserId: string | null; // Eski 'createdBy' objesi yerine ID string'i kullanılıyor
+  createdByUserId: string | null;
   expirationDate: string | null;
 }
 
@@ -19,7 +19,7 @@ interface UserProfile {
   email?: string;
   university?: string;
   department?: string;
-  skyNumber?: string; 
+  skyNumber?: string;
   [key: string]: any;
 }
 
@@ -36,7 +36,7 @@ export default function ManageUrlsPage() {
   const [isUserLoading, setIsUserLoading] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
 
-  // İşlem (Edit, Delete, QR) State'leri
+  // İşlem State'leri
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editAlias, setEditAlias] = useState('');
   const [editUrl, setEditUrl] = useState('');
@@ -81,8 +81,6 @@ export default function ManageUrlsPage() {
       .finally(() => setIsLoading(false));
   }, [token]);
 
-  // --- KULLANICI İŞLEMLERİ ---
-  // --- KULLANICI İŞLEMLERİ ---
   const handleUserClick = async (userId: string) => {
     setIsUserModalOpen(true);
     setIsUserLoading(true);
@@ -98,7 +96,6 @@ export default function ManageUrlsPage() {
       });
 
       if (!res.ok) throw new Error(`Kullanıcı bilgileri alınamadı (Hata: ${res.status})`);
-      
       const responseData = await res.json();
       
       if (responseData.success && responseData.data) {
@@ -106,7 +103,6 @@ export default function ManageUrlsPage() {
       } else {
         throw new Error("Kullanıcı verisi formatı geçersiz.");
       }
-      
     } catch (err: any) {
       setUserError(err.message);
     } finally {
@@ -120,7 +116,6 @@ export default function ManageUrlsPage() {
     setUserError(null);
   };
 
-  // --- MODERATÖR İŞLEMLERİ ---
   const handleDelete = async (id: number) => {
     if (!confirm('Bu URL sistemden tamamen silinsin mi?')) return;
     setDeleteLoadingId(id);
@@ -176,7 +171,6 @@ export default function ManageUrlsPage() {
     }
   };
 
-  // --- QR KOD İŞLEMLERİ ---
   const openQrModal = async (url: UrlData) => {
     setQrModalUrl(url);
     setQrLoading(true);
@@ -223,7 +217,7 @@ export default function ManageUrlsPage() {
 
       {/* KULLANICI DETAY MODALI */}
       {isUserModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md relative border border-gray-200 dark:border-gray-700">
             <button onClick={closeUserModal} className="absolute top-4 right-4 text-2xl text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors">×</button>
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white border-b pb-2 dark:border-gray-700">Kullanıcı Profili</h2>
@@ -240,8 +234,8 @@ export default function ManageUrlsPage() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Ad Soyad</p>
                   <p className="font-semibold text-base">{selectedUser.firstName} {selectedUser.lastName}</p>
                 </div>
-                {selectedUser.email && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">E-posta</p><p className="font-medium">{selectedUser.email}</p></div>)}
-                {selectedUser.skyNumber && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sky Numarası</p><p className="font-mono text-indigo-500 font-bold">{selectedUser.sky_number}</p></div>)}
+                {selectedUser.email && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">E-posta</p><p className="font-medium break-all">{selectedUser.email}</p></div>)}
+                {selectedUser.skyNumber && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sky Numarası</p><p className="font-mono text-indigo-500 font-bold">{selectedUser.skyNumber}</p></div>)}
                 {selectedUser.university && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Üniversite</p><p>{selectedUser.university}</p></div>)}
                 {selectedUser.department && (<div><p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bölüm</p><p>{selectedUser.department}</p></div>)}
               </div>
@@ -252,7 +246,7 @@ export default function ManageUrlsPage() {
 
       {/* QR MODALI */}
       {qrModalUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md relative border border-gray-200 dark:border-gray-700">
             <button onClick={closeQrModal} className="absolute top-4 right-4 text-2xl text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors">×</button>
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white border-b pb-2 dark:border-gray-700">QR Kod</h2>
@@ -262,8 +256,8 @@ export default function ManageUrlsPage() {
               </div>
             ) : (
               <>
-                {qrImgUrl && <img src={qrImgUrl} alt="QR Kod" className="mx-auto mb-4 w-64 h-64 bg-white p-2 rounded-xl shadow-inner" />}
-                <div className="mb-4 text-sm text-gray-700 dark:text-gray-200 space-y-2 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                {qrImgUrl && <img src={qrImgUrl} alt="QR Kod" className="mx-auto mb-4 w-48 h-48 sm:w-64 sm:h-64 bg-white p-2 rounded-xl shadow-inner" />}
+                <div className="mb-4 text-sm text-gray-700 dark:text-gray-200 space-y-2 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg overflow-hidden">
                   <div><span className="font-semibold text-gray-500 dark:text-gray-400">Alias:</span> {qrModalUrl.alias}</div>
                   <div><span className="font-semibold text-gray-500 dark:text-gray-400">URL:</span> <a href={qrModalUrl.url} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline break-all">{qrModalUrl.url}</a></div>
                 </div>
@@ -276,29 +270,29 @@ export default function ManageUrlsPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Tüm Linkler</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">Tüm Linkler</h1>
         {isModerator && (
-          <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300 border border-indigo-400">
+          <span className="self-start sm:self-auto bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-1 rounded dark:bg-indigo-900 dark:text-indigo-300 border border-indigo-400">
             Moderatör Modu
           </span>
         )}
       </div>
 
-      {isLoading && <p className="text-gray-600 dark:text-gray-400 animate-pulse">Linkler yükleniyor...</p>}
-      {error && <p className="text-red-600 dark:text-red-400 bg-red-100 p-3 rounded">Hata: {error}</p>}
+      {isLoading && <p className="text-gray-600 dark:text-gray-400 animate-pulse text-sm sm:text-base">Linkler yükleniyor...</p>}
+      {error && <p className="text-red-600 dark:text-red-400 bg-red-100 p-3 rounded text-sm sm:text-base">Hata: {error}</p>}
 
       {!isLoading && !error && (
-        <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
+        <div className="overflow-x-auto relative shadow-md rounded-lg">
           <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
-                <th className="py-3 px-6">Alias</th>
-                <th className="py-3 px-6">Orijinal URL</th>
-                <th className="py-3 px-6">Tıklama</th>
-                <th className="py-3 px-6">Oluşturan</th>
-                <th className="py-3 px-6">Son Kullanma</th>
-                {isModerator && <th className="py-3 px-6">İşlem</th>}
+                <th className="py-3 px-3 sm:px-6">Alias</th>
+                <th className="py-3 px-6 hidden sm:table-cell">Orijinal URL</th>
+                <th className="py-3 px-3 sm:px-6">Tıklama</th>
+                <th className="py-3 px-3 sm:px-6">Oluşturan</th>
+                <th className="py-3 px-6 hidden md:table-cell">Son Kullanma</th>
+                {isModerator && <th className="py-3 px-3 sm:px-6">İşlem</th>}
               </tr>
             </thead>
             <tbody>
@@ -313,40 +307,40 @@ export default function ManageUrlsPage() {
                   editingId === url.id ? (
                     // DÜZENLEME MODU
                     <tr key={url.id} className="bg-indigo-50/50 dark:bg-indigo-900/20 border-b dark:border-gray-700">
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-3 sm:px-6">
                         <input
-                          className="border rounded px-3 py-2 w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="border rounded px-2 py-1.5 w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none text-xs sm:text-sm"
                           value={editAlias}
                           onChange={(e) => setEditAlias(e.target.value)}
                           disabled={editLoading}
                         />
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-6 hidden sm:table-cell">
                         <input
-                          className="border rounded px-3 py-2 w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="border rounded px-2 py-1.5 w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
                           value={editUrl}
                           onChange={(e) => setEditUrl(e.target.value)}
                           disabled={editLoading}
                         />
                       </td>
-                      <td className="py-4 px-6 font-semibold">{url.clickCount}</td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-3 sm:px-6 font-semibold">{url.clickCount}</td>
+                      <td className="py-3 px-3 sm:px-6 text-xs sm:text-sm">
                         {url.createdByUserId ? 'Kayıtlı Kullanıcı' : 'N/A'}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-6 hidden md:table-cell">
                         {url.expirationDate ? new Date(url.expirationDate).toLocaleDateString() : 'Süresiz'}
                       </td>
                       {isModerator && (
-                        <td className="py-4 px-6 flex gap-2">
+                        <td className="py-3 px-3 sm:px-6 flex flex-wrap gap-1 sm:gap-2">
                           <button
-                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition-colors w-full sm:w-auto"
                             onClick={() => handleEditSave(url.id)}
                             disabled={editLoading}
                           >
                             Kaydet
                           </button>
                           <button
-                            className="bg-gray-400 hover:bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                            className="bg-gray-400 hover:bg-gray-500 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition-colors w-full sm:w-auto"
                             onClick={cancelEdit}
                             disabled={editLoading}
                           >
@@ -361,67 +355,73 @@ export default function ManageUrlsPage() {
                       key={url.id}
                       className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                     >
-                      <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                      <td className="py-3 px-3 sm:px-6 font-medium text-gray-900 dark:text-white">
                         <a
                           href={`https://skyl.app/${url.alias}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline font-mono"
+                          className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline font-mono text-sm"
                         >
                           skyl.app/{url.alias}
                         </a>
+                        {/* Mobilde görünecek mini orijinal URL */}
+                        <div className="sm:hidden text-[10px] text-gray-400 mt-1 truncate max-w-[120px]">
+                          {url.url}
+                        </div>
                       </td>
-                      <td className="py-4 px-6 max-w-xs truncate" title={url.url}>
+                      <td className="py-3 px-6 hidden sm:table-cell max-w-xs truncate" title={url.url}>
                         <a
                           href={url.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="hover:underline text-gray-600 dark:text-gray-300"
+                          className="hover:underline text-gray-600 dark:text-gray-300 text-sm"
                         >
                           {url.url}
                         </a>
                       </td>
-                      <td className="py-4 px-6 font-semibold">{url.clickCount}</td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-3 sm:px-6 font-semibold">{url.clickCount}</td>
+                      <td className="py-3 px-3 sm:px-6">
                         {url.createdByUserId ? (
                           <button
                             onClick={() => handleUserClick(url.createdByUserId as string)}
-                            className="text-blue-600 dark:text-blue-400 hover:underline font-medium focus:outline-none bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full text-xs"
+                            className="text-blue-600 dark:text-blue-400 hover:underline font-medium focus:outline-none bg-blue-50 dark:bg-blue-900/30 px-2 py-1 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs flex items-center justify-center whitespace-nowrap"
                           >
-                            Profili gör
+                            👤 Profili Gör
                           </button>
                         ) : (
-                          <span className="text-gray-400 italic">N/A</span>
+                          <span className="text-gray-400 italic text-xs">N/A</span>
                         )}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-6 hidden md:table-cell">
                         {url.expirationDate
                           ? new Date(url.expirationDate).toLocaleDateString()
                           : <span className="text-gray-400">Süresiz</span>}
                       </td>
                       {isModerator && (
-                        <td className="py-4 px-6 flex gap-2 flex-wrap">
-                          <button
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm"
-                            onClick={() => startEdit(url)}
-                            disabled={editLoading || deleteLoadingId === url.id}
-                          >
-                            Düzenle
-                          </button>
-                          <button
-                            className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm"
-                            onClick={() => handleDelete(url.id)}
-                            disabled={deleteLoadingId === url.id || editLoading}
-                          >
-                            {deleteLoadingId === url.id ? 'Siliniyor...' : 'Sil'}
-                          </button>
-                          <button
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm"
-                            onClick={() => openQrModal(url)}
-                            disabled={editLoading || deleteLoadingId === url.id}
-                          >
-                            QR Kod
-                          </button>
+                        <td className="py-3 px-3 sm:px-6">
+                          <div className="flex flex-wrap gap-1 sm:gap-2">
+                            <button
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-[10px] sm:text-xs font-medium transition-colors shadow-sm flex-1 sm:flex-none text-center"
+                              onClick={() => startEdit(url)}
+                              disabled={editLoading || deleteLoadingId === url.id}
+                            >
+                              Düzenle
+                            </button>
+                            <button
+                              className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-[10px] sm:text-xs font-medium transition-colors shadow-sm flex-1 sm:flex-none text-center"
+                              onClick={() => handleDelete(url.id)}
+                              disabled={deleteLoadingId === url.id || editLoading}
+                            >
+                              {deleteLoadingId === url.id ? '...' : 'Sil'}
+                            </button>
+                            <button
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-[10px] sm:text-xs font-medium transition-colors shadow-sm w-full sm:w-auto text-center"
+                              onClick={() => openQrModal(url)}
+                              disabled={editLoading || deleteLoadingId === url.id}
+                            >
+                              QR
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>
