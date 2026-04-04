@@ -3,18 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
-interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-}
-
 interface UrlData {
   id: number;
   url: string;
   alias: string;
   clickCount: number;
-  createdBy: User;
+  createdByUserId: string | null; // Eski 'createdBy' objesi yerine ID string'i kullanılıyor
   expirationDate: string | null;
 }
 
@@ -30,7 +24,7 @@ interface UserProfile {
 }
 
 export default function ManageUrlsPage() {
-  const { token, isModerator } = useAuth(); // isModerator'ü çektik
+  const { token, isModerator } = useAuth();
   const [urls, setUrls] = useState<UrlData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +82,7 @@ export default function ManageUrlsPage() {
   }, [token]);
 
   // --- KULLANICI İŞLEMLERİ ---
-  const handleUserClick = async (userId: number) => {
+  const handleUserClick = async (userId: string) => {
     setIsUserModalOpen(true);
     setIsUserLoading(true);
     setUserError(null);
@@ -329,7 +323,7 @@ export default function ManageUrlsPage() {
                       </td>
                       <td className="py-4 px-6 font-semibold">{url.clickCount}</td>
                       <td className="py-4 px-6">
-                        {url.createdBy ? `${url.createdBy.firstName} ${url.createdBy.lastName}` : 'N/A'}
+                        {url.createdByUserId ? 'Kayıtlı Kullanıcı' : 'N/A'}
                       </td>
                       <td className="py-4 px-6">
                         {url.expirationDate ? new Date(url.expirationDate).toLocaleDateString() : 'Süresiz'}
@@ -381,12 +375,12 @@ export default function ManageUrlsPage() {
                       </td>
                       <td className="py-4 px-6 font-semibold">{url.clickCount}</td>
                       <td className="py-4 px-6">
-                        {url.createdBy ? (
+                        {url.createdByUserId ? (
                           <button
-                            onClick={() => handleUserClick(url.createdBy.id)}
-                            className="text-blue-600 dark:text-blue-400 hover:underline font-medium focus:outline-none"
+                            onClick={() => handleUserClick(url.createdByUserId as string)}
+                            className="text-blue-600 dark:text-blue-400 hover:underline font-medium focus:outline-none bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full text-xs"
                           >
-                            {url.createdBy.firstName} {url.createdBy.lastName}
+                            Profili gör
                           </button>
                         ) : (
                           <span className="text-gray-400 italic">N/A</span>
